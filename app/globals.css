@@ -1,1 +1,5 @@
 @import "tailwindcss";
+
+/* Makes Tailwind's dark: variant follow the .dark class on <html>
+   (what your ThemeToggle sets) instead of the system setting. */
+@custom-variant dark (&:where(.dark, .dark *));

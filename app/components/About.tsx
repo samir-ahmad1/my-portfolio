@@ -1,113 +1,109 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { display, prefersReduced, useIso } from "./shared";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Placeholder copy: rewrite in your own words
-const STATEMENT =
-  "More than just code. I bring ideas to life by combining beautiful interfaces, intelligent systems, and seamless functionality into digital products built to make an impact.";
-
-// const SKILLS = ["Next.js", "React", "TypeScript", "Tailwind CSS", "Three.js", "GSAP"];
-const ROLES = [
-  "Building for the web.",
-  "Turning ideas into reality.",
-  "Creating digital experiences.",
-  "Always learning, always building.",
-];
-
-function Half() {
-  return (
-    <div className="flex shrink-0 items-center">
-      {[...ROLES, ...ROLES].map((s, i) => (
-        <span key={i} className="flex items-center">
-          <span
-            className={`${display.className} px-8 md:px-12 text-[clamp(4rem,11vw,10rem)] font-extrabold leading-none text-transparent [-webkit-text-stroke:1px_rgba(10,15,28,0.4)] dark:[-webkit-text-stroke:1px_rgba(255,255,255,0.35)]`}
-          >
-            {s}
-          </span>
-          <span className="h-3 w-3 rounded-full bg-blue-500" />
-        </span>
-      ))}
-    </div>
-  );
-}
+// Replace with your own copy.
+const ABOUT_TEXT =
+  "I build modern web experiences where motion, depth and performance work together. I care about the details most people never consciously notice, but always feel.";
 
 export default function About() {
-  const root = useRef<HTMLElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
 
-  useIso(() => {
-    const el = root.current;
-    if (!el) return;
+  useEffect(() => {
+    const section = sectionRef.current;
+    const glow = glowRef.current;
+    if (!section || !glow) return;
 
-    if (prefersReduced()) {
-      gsap.set(el.querySelectorAll(".word"), { opacity: 1 });
-      return;
-    }
+    const words = section.querySelectorAll<HTMLElement>("[data-word]");
+    const mm = gsap.matchMedia();
 
-    const ctx = gsap.context(() => {
-      // Words light up as you scroll through the paragraph
-      gsap.set(".word", { y: 10 });
-      gsap.to(".word", {
-        opacity: 1,
-        y: 0,
-        stagger: 0.12,
-        ease: "none",
+    // Full motion only. With reduced motion, nothing is pinned or animated and
+    // the text is shown at full opacity through the motion-reduce: classes.
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      // 1) Background: starts as the previous section's black, then a soft
+      //    light blooms in while About slides up and stacks over it.
+      gsap.fromTo(
+        glow,
+        { opacity: 0 },
+        {
+          opacity: 1,
+          ease: "none",
+          scrollTrigger: {
+            trigger: section,
+            start: "top bottom",
+            end: "top top",
+            scrub: true,
+          },
+        }
+      );
+
+      // 2) Pinned word-by-word reveal across 300vh of scrolling.
+      const tl = gsap.timeline({
+        defaults: { ease: "none" },
         scrollTrigger: {
-          trigger: ".statement",
-          start: "top 80%",
-          end: "bottom 45%",
-          scrub: true,
+          trigger: section,
+          start: "top top",
+          end: "+=300%",
+          pin: true,
+          pinSpacing: true,
+          scrub: 1, // smooths the scroll-to-animation link
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
         },
       });
 
-      // Marquee: runs on its own, but scroll speed boosts it and scroll direction flips it
-      const tween = gsap.to(".marquee-track", {
-        xPercent: -50,
-        ease: "none",
-        duration: 40,
-        repeat: -1,
-      });
-      tween.totalTime(tween.duration() * 1000); // start deep in the loop so it can run backwards
+      tl.fromTo(
+        words,
+        { opacity: 0.08, y: 28, filter: "blur(12px)" },
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          ease: "power2.out",
+          duration: 0.6,
+          // Spreads the words across the timeline so the last word
+          // lands exactly when the pin ends.
+          stagger: { amount: 1.4, ease: "none" },
+        }
+      );
+    });
 
-      ScrollTrigger.create({
-        onUpdate(self) {
-          const dir = self.direction === 1 ? 1 : -1;
-          const boost = Math.min(Math.abs(self.getVelocity()) / 250, 6);
-          gsap
-            .timeline()
-            .to(tween, { timeScale: dir * (1 + boost), duration: 0.15, overwrite: true })
-            .to(tween, { timeScale: dir, duration: 1.2 });
-        },
-      });
-    }, el);
-
-    return () => ctx.revert();
+    return () => mm.revert();
   }, []);
 
   return (
-    <section id="about" ref={root} className="relative transition-colors duration-500 bg-[#eef2f9] dark:bg-[#05070d] py-40 text-[#0a0f1c] dark:text-white">
-      <div className="px-8 md:px-12">
-        <p
-          className={`statement ${display.className} max-w-[1200px] text-4xl font-medium leading-[1.1] tracking-tight sm:text-5xl md:ml-[10%] md:text-6xl lg:text-7xl`}
-        >
-          {STATEMENT.split(" ").map((w, i) => (
-            <span key={i} className="word mr-[0.25em] inline-block opacity-[0.14]">
-              {w}
-            </span>
-          ))}
-        </p>
-      </div>
+    <section
+      ref={sectionRef}
+      id="about"
+      className="relative z-10 flex h-screen w-full items-center justify-center overflow-hidden bg-white px-6 sm:px-10 dark:bg-black"
+    >
+      {/* Soft cinematic light (dark) / soft shade (light) that fades in as the section arrives */}
+      <div
+        ref={glowRef}
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_50%_50%,rgba(0,0,0,0.06),transparent_70%)] motion-reduce:opacity-100 dark:bg-[radial-gradient(ellipse_70%_55%_at_50%_50%,rgba(255,255,255,0.09),transparent_70%)]"
+      />
 
-      <div className="mt-40 overflow-hidden">
-        <div className="marquee-track flex w-max">
-          <Half />
-          <Half />
-        </div>
-      </div>
+      <p
+        className="relative mx-auto max-w-5xl text-center text-[clamp(1.5rem,4.2vw,3.5rem)] font-medium leading-[1.2] tracking-tight text-neutral-950 dark:text-white"
+        aria-label={ABOUT_TEXT}
+      >
+        {ABOUT_TEXT.split(" ").map((word, i) => (
+          <span key={i} aria-hidden>
+            <span
+              data-word
+              className="inline-block opacity-[0.08] blur-[12px] will-change-[transform,opacity,filter] motion-reduce:opacity-100 motion-reduce:blur-none"
+            >
+              {word}
+            </span>{" "}
+          </span>
+        ))}
+      </p>
     </section>
   );
 }
