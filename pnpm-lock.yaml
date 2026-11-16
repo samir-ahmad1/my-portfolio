@@ -181,6 +181,9 @@ importers:
       gsap:
         specifier: ^3.15.1
         version: 3.15.1
+      html2canvas-pro:
+        specifier: ^2.6.4
+        version: 2.6.4
       lucide-react:
         specifier: ^1.72.0
         version: 1.72.0(@types/react@19.3.0)(react@19.3.0)
@@ -1588,6 +1591,10 @@ packages:
 
   hls.js@1.7.4:
     resolution: {integrity: sha512-3GlxGdPvT2YHvQYOt+yOzT/DEior/qJVNIylHA77kgeoBTdQQqi70GwefNEUmHQeNGyjC8U62+bruqW/Tpm+tg==}
+
+  html2canvas-pro@2.6.4:
+    resolution: {integrity: sha512-1SMOfXwMACgQPt1wcKOtuRnBxkcREiJQdOyVpgp6a4/z9Rb/v7QPcvyu5GlxdDDiMznLwKxX5KwvtSlNlZJ7Wg==}
+    engines: {node: '>=24.0.0'}
 
   ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
@@ -3944,6 +3951,8 @@ snapshots:
       hermes-estree: 0.25.1
 
   hls.js@1.7.4: {}
+
+  html2canvas-pro@2.6.4: {}
 
   ieee754@1.2.1: {}
 
